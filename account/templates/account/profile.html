@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="font-family:'Shabnam'">
+    <!-- Follow and Unfollow -->
+        <div class="m-2 badge fs-6" style="background-color:blue">{% if request.user.is_authenticated and request.user == user %}Welcome {{user.username}}{% endif %}</div><br><br>
+            {% if request.user.id != user.id and not is_following %}
+                <a class="m-2 btn btn-success mb-3" href="{% url 'account:user_follow' user.id %}">Follow</a>
+            {% elif request.user.id != user.id and is_following %}
+                <a class="m-2 btn btn-danger mb-3" href="{% url 'account:user_unfollow' user.id %}">Unfollow</a>
+            {% endif %}
+
+        <!-- Show each user's post in her own profile -->
+        <div class="row">
+                {% for post in posts %}
+                    <div class="col-sm-13">
+                    <div class="card bg m-2" style="background-color:#b2bec3">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ post.title }}</h4>
+                            <h6 class="card-title">{{ post.created|timesince }}</h6>
+                            <p class="card-text">{{ post.body|safe|truncatewords:8 }}</p>
+                            <a href="{{ post.get_absolute_url }}" class="btn btn-primary">Detail</a>
+                        </div>
+                    </div>
+                    </div>
+                {% empty %}
+                    <p style="color:red; padding:6px">You don't have post...!</p>
+                {% endfor %}
+        </div>
+</div>
+{% endblock %}

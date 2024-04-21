@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div style="font-family:'Shabnam'">
+        <!-- Search -->
+            <form class="form-inline" action="{% url 'home:post_search' %}">
+                <input class="m-2" type="text" name="q" style="border-radius:10px" placeholder="Search">
+                <button class="btn btn-success" style="padding:8px; border-radius:11px">Search</button>
+            </form>
+
+        <!-- Show posts in home page -->
+            <div class="m-2 badge fs-6" style="background-color:blue">{% if request.user.is_authenticated %}Welcome {{user.username}}{% endif %}</div><br>
+            <div class="row">
+                {% for post in object_list %}
+                    <div class="col-sm-13">
+                    <div class="card bg m-2" style="background-color:#b2bec3">
+                        <div class="card-body">
+                            <h5 class="card-user">Author: {{ post.user}}</h5>
+                            <h4 class="card-title">{{ post.title }}</h4>
+                            <h6 class="card-title">{{ post.created|timesince }}</h6><br>
+                            <p class="card-text">{{ post.body|safe|truncatewords:18 }}</p>
+                            <a href="{{ post.get_absolute_url }}" class="btn btn-primary">Detail</a>
+                        </div>
+                    </div>
+                    </div>
+                {% empty %}
+                    <p style="color:red; padding:6px">There aren't any post here...!</p>
+                {% endfor %}
+            </div><br>
+
+        <!-- paginator -->
+            {% if is_paginated %}
+                <div class="clearfix pager-botton">
+            {% if page_obj.has_previous %}
+                <a class="btn btn-warning m-2 float-right" href="{% url 'home:home' page_obj.previous_page_number %}">New Posts &rarr;</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a class="btn btn-warning m-2 float-right" href="{% url 'home:home' page_obj.next_page_number %}">Old Posts &larr;</a>
+            {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

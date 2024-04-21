@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div style="font-family:'Shabnam'">
+	<!--Delete and Update-->
+		{% if request.user.id == post.user.id %}
+			<a href="{% url 'home:post_delete' post.id %}" class="btn btn-danger">Delete</a>
+			<a href="{% url 'home:post-update' post.id %}" class="btn btn-info">Update</a>
+
+		{% elif request.user.is_superuser %}
+			<a href="{% url 'home:post_delete' post.id %}" class="btn btn-danger">Delete</a>
+			<a href="{% url 'home:post-update' post.id %}" class="btn btn-info">Update</a>
+
+		{% endif %}
+
+		<!--like Articles-->
+		{% if request.user.is_authenticated %}
+			<a class="{% if can_like %} disabled {% endif %} mb-1 mt-1 btn btn-primary" href="{% url 'home:post_like' post.id %}">Like {{ post.likes_count }}</a>
+		{% endif %}
+		<div class="card bg mt-3 b-3 p-3" style="background-color:#e5f6fb; line-height:35px; border:3px solid #7f8fa6">
+			<p><a href="{% url 'account:user_profile' post.user.id %}">{{ post.user.username }}</a> - {{ post.updated|date:"Y-M" }}</p>
+			<p>{{ post.body|safe }}</p>
+		</div><br>
+
+		<!--comments and Responses-->
+			<p class="badge" style="background-color:purple">Put comment</p><br>
+			{% if request.user.is_authenticated %}
+				<form action="" method="post">
+					{% csrf_token %}
+					<details class="p-3 text" style="color:black">
+						<summary>Comment</summary>
+						{{ form.as_p }}
+						<input class="btn btn-success" type="submit" value="Send">
+					</details>
+				</form>
+			{% else %}
+				<p class="alert alert-danger col-md-8">*Only logged in users can put comment!<p>
+			{% endif %}<br>
+			
+			<p class="badge" style="background-color:darkblue">Number of comments: {{ comments.count }}</p><br>
+		
+			{% for comment in comments %}
+				<div class="card bg-dark text-warning">
+					<p class="card-header">{{ comment.user }} | {{ comment.created|timesince }}</p>
+					<p class="card-body">{{ comment.body }}</p>
+					
+					{% if request.user.is_authenticated %}
+						<form action="{% url 'home:add_reply' post.id comment.id %}" method="post">
+							{% csrf_token %}
+							<details class="p-3 text" style="color:white">
+								<summary>Reply</summary>
+								{{ form_reply.as_p }}
+								<input class="btn btn-success" type="submit" value="Send">
+							</details>
+						</form>
+					{% endif %}
+
+					<!-- Reply -->
+					{% with replies=comment.rcomments.all %}
+						{% for reply in replies %}
+							<p class="p-3 text-white bg" style="background-color:#00796B; margin-left:30px">{{ reply.user }} | {{ reply.created|timesince }}:<br/>{{ reply.body }}</p>
+						{% endfor %}
+					{% endwith %}
+				</div>
+
+			{% empty %}
+				<p class="alert col-md-8" style="background-color:black; color:yellow">*You don't have any comments!<p>
+			{% endfor %}
+	</div>
+{% endblock %}
